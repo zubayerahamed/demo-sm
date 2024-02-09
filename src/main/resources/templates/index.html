@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Bootstrap Example</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<a th:href="@{/}" class="basePath"></a>
+
+	<div class="jumbotron text-center">
+		<h1>Server Monitoring Tool</h1>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12 text-center">
+				<h3>Tomcat Status - <span class="tomcat-status">Running</span></h3>
+				<button type="button" class="btn btn-danger btn-sm tomcat-start-stop-btn">Stop</button>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		function getBasepath(){
+			var basePath = $('a.basePath').attr('href');
+			basePath = basePath.split('/')[1];
+			var href = location.href.split('/');
+			if(basePath != ''){
+				return href[0] + '//' + href[2] + '/' + basePath;
+			}
+			return href[0] + '//' + href[2];
+		}
+
+		function getTomcatStatus(){
+			$.ajax({
+				url: getBasepath() + '/tomcat/status',
+				type: "GET",
+				success: function (data) {
+					$(".tomcat-status").html("");
+					$(".tomcat-status").append(data);
+					
+					if(data == 'RUNNING'){
+						$('.tomcat-start-stop-btn').html("Stop");
+						$('.tomcat-start-stop-btn').removeClass("btn-success");
+						$('.tomcat-start-stop-btn').addClass("btn-danger");
+					} else {
+						$('.tomcat-start-stop-btn').html("Start");
+						$('.tomcat-start-stop-btn').removeClass("btn-danger");
+						$('.tomcat-start-stop-btn').addClass("btn-success");
+					}
+					
+				},
+				error: function (jqXHR, status, errorThrown) {
+				},
+			});
+		}
+
+		function stopTomcat(){
+			console.log("Stopping tomcat");
+			$.ajax({
+				url: getBasepath() + '/tomcat/stop',
+				type: "GET",
+				success: function (data) {
+					if(data == "0") alert("Tomcat stopped")
+					getTomcatStatus();
+				},
+				error: function (jqXHR, status, errorThrown) {
+				},
+			});
+		}
+
+		function startTomcat(){
+			console.log("Starting tomcat");
+			$.ajax({
+				url: getBasepath() + '/tomcat/start',
+				type: "GET",
+				success: function (data) {
+					if(data == "0") alert("Tomcat started")
+					getTomcatStatus();
+				},
+				error: function (jqXHR, status, errorThrown) {
+				},
+			});
+		}
+
+		$(document).ready(function(){
+
+			getTomcatStatus();
+
+			$('.tomcat-start-stop-btn').off('click').on('click', function(e){
+				e.preventDefault();
+				if($(this).html() == 'Stop'){
+					stopTomcat();
+				} else {
+					startTomcat();
+				}
+			})
+
+		})
+	</script>
+</body>
+</html>

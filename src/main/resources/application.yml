@@ -1,1 +1,3 @@
-
+app: 
+  tomcat-service: Tomcat9
+  database-name: demo
